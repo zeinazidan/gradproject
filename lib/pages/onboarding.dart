@@ -190,7 +190,18 @@ class _DocumentUploadTileState extends State<DocumentUploadTile> {
         await ref.putFile(File(filePath));
       }
 
-      await ref.getDownloadURL();
+      final downloadURL = await ref.getDownloadURL();
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('documents')
+          .doc(widget.title)
+          .set({
+        'title': widget.title,
+        'url': downloadURL,
+        'fileName': fileName,
+        'uploadedAt': Timestamp.now(),
+      });
 
       widget.onUploaded(true);
 

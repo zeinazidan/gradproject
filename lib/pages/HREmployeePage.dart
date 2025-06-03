@@ -4,6 +4,7 @@ import 'resumescreening.dart';
 import 'FeedbackAnalysisPage.dart';
 import 'settings_page.dart';
 import 'CalendarPage.dart';
+import 'documents_view.dart';
 
 class HREmployeePage extends StatefulWidget {
   final String userEmail;
@@ -73,180 +74,168 @@ class _HREmployeePageState extends State<HREmployeePage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
+                const CircleAvatar(
+                  backgroundImage: AssetImage('assets/profile.jpg'),
+                  radius: 24,
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CircleAvatar(
-                      backgroundImage: AssetImage('assets/profile.jpg'),
-                      radius: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Welcome, $userName",
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const Text("HR Manager", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                      ],
-                    )
+                    Text("Welcome, $userName",
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text("HR Manager", style: TextStyle(color: Colors.grey)),
                   ],
+                )
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                _buildStatBox("28", "Active Jobs", Colors.blue),
+                const SizedBox(width: 12),
+                _buildStatBox("156", "Applications", Colors.green),
+              ],
+            ),
+            const SizedBox(height: 24),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              children: [
+                _FeatureTile(
+                  icon: Icons.android,
+                  title: "AI Chatbot",
+                  subtitle: "Quick responses",
+                  onTap: _openChatbot,
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(child: _buildStatBox("28", "Active Jobs", Colors.blue.withOpacity(0.1), Colors.blue)),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildStatBox("156", "Applications", Colors.green.withOpacity(0.1), Colors.green)),
-                  ],
+                _FeatureTile(
+                  icon: Icons.description,
+                  title: "Resume Screening",
+                  subtitle: "Review CVs",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ResumeScreeningPage()),
+                    );
+                  },
                 ),
-                const SizedBox(height: 32),
-                LayoutBuilder(
-                    builder: (context, constraints) {
-                      int crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
-                      return GridView.count(
-                        crossAxisCount: crossAxisCount,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 1.2,
-                        children: [
-                          _FeatureTile(
-                            icon: Icons.android,
-                            title: "AI Chatbot",
-                            subtitle: "Quick responses",
-                            onTap: _openChatbot,
-                          ),
-                          _FeatureTile(
-                            icon: Icons.description,
-                            title: "Resume Screening",
-                            subtitle: "Review CVs",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => ResumeScreeningPage()),
-                              );
-                            },
-                          ),
-                          _FeatureTile(
-                            icon: Icons.bar_chart,
-                            title: "Feedback",
-                            subtitle: "Analysis",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => FeedbackAnalysisPage()),
-                              );
-                            },
-                          ),
-                          _FeatureTile(
-                            icon: Icons.calendar_today,
-                            title: "Calendar",
-                            subtitle: "Schedule",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const CalendarPage()),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    }
+                _FeatureTile(
+                  icon: Icons.bar_chart,
+                  title: "Feedback",
+                  subtitle: "Analysis",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => FeedbackAnalysisPage()),
+                    );
+                  },
                 ),
-                const SizedBox(height: 32),
-                const Text(
-                  'Recent Activities',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                _FeatureTile(
+                  icon: Icons.calendar_today,
+                  title: "Calendar",
+                  subtitle: "Schedule",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CalendarPage()),
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                Card(
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      activityItem(
-                        icon: Icons.check_circle,
-                        color: Colors.green,
-                        title: "Attendance marked for today",
-                        time: "9:00 AM",
-                      ),
-                      const Divider(height: 1),
-                      activityItem(
-                        icon: Icons.check_box,
-                        color: Colors.blue,
-                        title: "Leave request approved",
-                        time: "Yesterday",
-                      ),
-                      const Divider(height: 1),
-                      activityItem(
-                        icon: Icons.event_available,
-                        color: Colors.purple,
-                        title: "Team meeting scheduled",
-                        time: "Yesterday",
-                      ),
-                    ],
-                  ),
+                _FeatureTile(
+                  icon: Icons.folder_shared,
+                  title: "Onboarding Docs",
+                  subtitle: "View uploads",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const OnboardingDocumentsView()),
+                    );
+                  },
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 24),
+            const Text("Upcoming Interviews", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            _buildInterviewTile("John Developer", "Frontend Developer", "2:30 PM", Colors.blue),
+            _buildInterviewTile("Alice Designer", "UI/UX Designer", "4:00 PM", Colors.purple),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openChatbot,
         child: const Icon(Icons.chat),
       ),
-    );
-  }
-
-  Widget _buildStatBox(String number, String label, Color bgColor, Color textColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(number,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              )
-          ),
-          const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(
-                color: textColor.withOpacity(0.8),
-                fontSize: 14,
-              )
-          ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Alerts'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );
   }
 
-  Widget activityItem({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String time,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: color, size: 20),
-      title: Text(title, style: const TextStyle(fontSize: 14)),
-      trailing: Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-      dense: true,
+  Widget _buildStatBox(String number, String label, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(number, style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text(label, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInterviewTile(String name, String role, String time, Color avatarColor) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: avatarColor.withOpacity(0.2),
+            child: Icon(Icons.person, color: avatarColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(role, style: const TextStyle(color: Colors.grey)),
+              ],
+            ),
+          ),
+          Text(time, style: const TextStyle(color: Colors.black54)),
+        ],
+      ),
     );
   }
 }
@@ -266,31 +255,22 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.blue, size: 28),
-              const SizedBox(height: 8),
-              Text(title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-              Text(subtitle,
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey
-                ),
-              ),
-            ],
-          ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.blue, size: 32),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          ],
         ),
       ),
     );
