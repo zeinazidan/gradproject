@@ -24,7 +24,6 @@ class _LoginPageState extends State<LoginPage> {
     try {
       setState(() => _isLoading = true);
 
-      // Sign in user
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -33,19 +32,22 @@ class _LoginPageState extends State<LoginPage> {
       final uid = userCredential.user!.uid;
       final userEmail = userCredential.user!.email ?? "";
 
-      // Fetch user role from Firestore
       final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (!doc.exists || !doc.data()!.containsKey('role')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("User role not found.")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("User role not found.")),
+          );
+          setState(() => _isLoading = false);
+        }
         return;
       }
 
       final role = doc['role'];
 
-      // Navigate based on role
+      if (!mounted) return;
+
       if (role == 'new') {
         Navigator.pushReplacement(
           context,
@@ -55,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmployeePage(userEmail: userEmail), // Pass userEmail here
+            builder: (_) => EmployeePage(userEmail: userEmail),
           ),
         );
       } else if (role == 'hr') {
@@ -69,77 +71,198 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Unknown role.")),
         );
+        setState(() => _isLoading = false);
+        return;
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Login failed")),
-      );
-    } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "Login failed")),
+        );
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  bool _passwordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    final darkBlue = const Color(0xFF0A2540);
+    final lightBlue = const Color(0xFF5A8BD6);
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 60),
-            const Icon(Icons.android, size: 80, color: Colors.blue),
-            const SizedBox(height: 16),
-            const Text("REBOTA", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            const Text("Your HR Assistant", style: TextStyle(fontSize: 16, color: Colors.grey)),
-            const SizedBox(height: 40),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Card(
+            color: darkBlue,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 12,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Robot icon container with glow
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: lightBlue.withOpacity(0.6),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.android,
+                      size: 80,
+                      color: lightBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "REBOTA",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 4,
+                      color: lightBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Your HR Assistant",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: lightBlue.withOpacity(0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 36),
 
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  // Email TextField with dark background and floating label style
+                  TextField(
+                    controller: emailController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Email or Phone Number',
+                      labelStyle: TextStyle(color: lightBlue.withOpacity(0.7)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: lightBlue.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: lightBlue, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF15306B),
+                      prefixIcon: Icon(Icons.email_outlined, color: lightBlue),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password field with toggle visibility button
+                  TextField(
+                    controller: passwordController,
+                    obscureText: !_passwordVisible,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(color: lightBlue.withOpacity(0.7)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: lightBlue.withOpacity(0.6)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: lightBlue, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF15306B),
+                      prefixIcon: Icon(Icons.lock_outline, color: lightBlue),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _passwordVisible ? Icons.visibility_off : Icons.visibility,
+                          color: lightBlue,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Add forgot password functionality
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: lightBlue.withOpacity(0.8)),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : login,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                          if (states.contains(MaterialState.disabled)) {
+                            return lightBlue.withOpacity(0.5);
+                          }
+                          return lightBlue;
+                        }),
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        elevation: MaterialStateProperty.all(8),
+                        shadowColor: MaterialStateProperty.all(lightBlue.withOpacity(0.6)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                          : const Text(
+                        "Login",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {}, // TODO: Add forgot password logic if needed
-                child: const Text('Forgot Password?'),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            ElevatedButton(
-              onPressed: _isLoading ? null : login,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 40),
-              ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Login", style: TextStyle(fontSize: 18)),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: IconButton(
-          icon: const Icon(Icons.home),
-          onPressed: () {}, // Optional: Add home navigation
+          ),
         ),
       ),
     );

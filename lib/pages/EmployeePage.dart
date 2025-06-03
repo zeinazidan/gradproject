@@ -58,74 +58,91 @@ class EmployeePage extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildGridItem(context, Icons.chat_bubble_outline, "Chatbot", Colors.blue[100]!, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
-                }),
-                buildGridItem(context, Icons.folder_open, "HR Records", Colors.purple[100]!, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => HRRecordsPage()));
-                }),
-                buildGridItem(context, Icons.calendar_today, "Calendar", Colors.green[100]!, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarPage()));
-                }),
-                buildGridItem(context, Icons.feedback_outlined, "Feedback", Colors.orange[100]!, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedbackFormPage()));
-                }),
+                LayoutBuilder(
+                    builder: (context, constraints) {
+                      int crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
+                      return GridView.count(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        shrinkWrap: true,
+                        childAspectRatio: 1.2,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          buildGridItem(context, Icons.chat_bubble_outline, "Chatbot", Colors.blue[50]!, () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
+                          }),
+                          buildGridItem(context, Icons.folder_open, "HR Records", Colors.purple[50]!, () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => HRRecordsPage()));
+                          }),
+                          buildGridItem(context, Icons.calendar_today, "Calendar", Colors.green[50]!, () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarPage()));
+                          }),
+                          buildGridItem(context, Icons.feedback_outlined, "Feedback", Colors.orange[50]!, () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedbackFormPage()));
+                          }),
+                        ],
+                      );
+                    }
+                ),
+                const SizedBox(height: 32),
+                const Text(
+                  'Recent Activities',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Column(
+                    children: [
+                      activityItem(
+                        icon: Icons.check_circle,
+                        color: Colors.green,
+                        title: "Attendance marked for today",
+                        time: "9:00 AM",
+                      ),
+                      const Divider(height: 1),
+                      activityItem(
+                        icon: Icons.check_box,
+                        color: Colors.blue,
+                        title: "Leave request approved",
+                        time: "Yesterday",
+                      ),
+                      const Divider(height: 1),
+                      activityItem(
+                        icon: Icons.event_available,
+                        color: Colors.purple,
+                        title: "Team meeting scheduled",
+                        time: "Yesterday",
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // Submit tasks logic
+                    },
+                    icon: const Icon(Icons.send),
+                    label: const Text("Submit All Tasks"),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(200, 40),
+                    ),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Recent Activities',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            activityItem(
-              icon: Icons.check_circle,
-              color: Colors.green,
-              title: "Attendance marked for today",
-              time: "9:00 AM",
-            ),
-            activityItem(
-              icon: Icons.check_box,
-              color: Colors.blue,
-              title: "Leave request approved",
-              time: "Yesterday",
-            ),
-            activityItem(
-              icon: Icons.event_available,
-              color: Colors.purple,
-              title: "Team meeting scheduled",
-              time: "Yesterday",
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Submit tasks logic
-                },
-                icon: const Icon(Icons.send),
-                label: const Text("Submit All Tasks"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  textStyle: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -141,24 +158,31 @@ class EmployeePage extends StatelessWidget {
   }
 
   Widget buildGridItem(BuildContext context, IconData icon, String label, Color color, VoidCallback? onTap) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: Colors.black),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-          ],
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 28, color: Colors.black87),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -170,24 +194,11 @@ class EmployeePage extends StatelessWidget {
     required String title,
     required String time,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-          Text(
-            time,
-            style: const TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
+    return ListTile(
+      leading: Icon(icon, color: color, size: 20),
+      title: Text(title, style: const TextStyle(fontSize: 14)),
+      trailing: Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      dense: true,
     );
   }
 }
